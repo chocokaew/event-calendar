@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Event Simulator 2569</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F8FAFC;
+    --white: #ffffff;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --violet-50: #f5f3ff;
+    --violet-100: #ede9fe;
+    --violet-200: #ddd6fe;
+    --violet-300: #c4b5fd;
+    --violet-600: #7c3aed;
+    --violet-700: #6d28d9;
+    --rose-50: #fff1f2; --rose-100: #ffe4e6; --rose-200: #fecdd3; --rose-500: #f43f5e; --rose-600: #e11d48; --rose-700: #be123c;
+    --pink-50: #fdf2f8; --pink-100: #fce7f3; --pink-200: #fbcfe8; --pink-500: #ec4899; --pink-700: #be185d;
+    --indigo-50: #eef2ff; --indigo-100: #e0e7ff; --indigo-200: #c7d2fe; --indigo-500: #6366f1; --indigo-700: #4338ca;
+    --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-200: #fde68a; --amber-500: #f59e0b; --amber-700: #b45309;
+    --emerald-50: #ecfdf5; --emerald-100: #d1fae5; --emerald-200: #a7f3d0; --emerald-500: #10b981; --emerald-700: #047857;
+    --sky-50: #f0f9ff; --sky-100: #e0f2fe; --sky-200: #bae6fd; --sky-500: #0ea5e9; --sky-700: #0369a1;
+  }
+
+  body {
+    font-family: 'Anuphan', sans-serif;
+    background: var(--bg);
+    color: var(--slate-900);
+    min-height: 100vh;
+    padding-bottom: 6rem;
+  }
+
+  /* ---------- HEADER ---------- */
+  header {
+    background: var(--white);
+    border-bottom: 2px solid var(--slate-100);
+    position: sticky; top: 0; z-index: 40;
+    box-shadow: 0 1px 8px rgba(0,0,0,.04);
+  }
+  .header-inner {
+    max-width: 1280px; margin: auto;
+    padding: 0 1.5rem;
+    height: 6rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .brand { display: flex; align-items: center; gap: 1.25rem; }
+  .brand-icon {
+    width: 3.5rem; height: 3.5rem;
+    background: var(--violet-600); border-radius: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(124,58,237,.3);
+  }
+  .brand-title { font-size: 1.4rem; font-weight: 900; color: var(--slate-800); }
+  .brand-title span { color: var(--violet-600); }
+  .brand-sub { font-size: .7rem; font-weight: 800; color: var(--slate-400); letter-spacing: .12em; text-transform: uppercase; }
+
+  nav.tabs {
+    display: flex; gap: .5rem;
+    background: var(--slate-100); padding: .5rem; border-radius: 1.5rem;
+  }
+  nav.tabs button {
+    padding: .75rem 1.5rem; border-radius: 1.2rem; border: none; cursor: pointer;
+    font-family: inherit; font-size: .85rem; font-weight: 800;
+    color: var(--slate-500); background: transparent;
+    display: flex; align-items: center; gap: .4rem;
+    transition: all .2s;
+  }
+  nav.tabs button.active {
+    background: var(--white); color: var(--violet-600);
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+
+  .btn-new {
+    background: var(--slate-900); color: #fff;
+    border: none; cursor: pointer; font-family: inherit; font-weight: 900; font-size: .9rem;
+    padding: 1rem 2rem; border-radius: 1rem;
+    display: flex; align-items: center; gap: .5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    transition: all .2s; white-space: nowrap;
+  }
+  .btn-new:hover { background: var(--violet-600); transform: translateY(-1px); }
+  .btn-new:active { transform: scale(.96); }
+
+  /* ---------- MAIN ---------- */
+  main { max-width: 1280px; margin: auto; padding: 2.5rem 1.5rem; }
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; }
+  .search-wrap input {
+    width: 100%; height: 4rem;
+    background: var(--white); border: 2px solid var(--slate-100); border-radius: 1.5rem;
+    padding: 0 1.5rem 0 3.5rem; font-family: inherit; font-size: 1rem; font-weight: 700;
+    outline: none; transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: var(--violet-300); }
+  .search-icon { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--slate-300); }
+  .toolbar select {
+    height: 4rem; padding: 0 1.5rem; border: 2px solid var(--slate-100); border-radius: 1.5rem;
+    background: var(--white); font-family: inherit; font-size: .95rem; font-weight: 800;
+    color: var(--slate-700); outline: none; cursor: pointer; min-width: 160px;
+    transition: border-color .2s;
+  }
+  .toolbar select:focus { border-color: var(--violet-300); }
+
+  /* ---------- CARDS ---------- */
+  .card {
+    border-radius: 2rem; border: 2px solid var(--slate-100);
+    background: var(--white); transition: box-shadow .3s;
+  }
+  .card:hover { box-shadow: 0 20px 60px rgba(0,0,0,.08); }
+
+  /* ---------- OVERVIEW ---------- */
+  .overview-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  .month-card { overflow: hidden; display: flex; flex-direction: column; }
+  .month-header {
+    background: var(--slate-50); padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--slate-100);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .month-header h3 { font-size: 1.2rem; font-weight: 900; color: var(--slate-800); }
+  .month-count {
+    background: var(--white); padding: .25rem .75rem; border-radius: 999px;
+    font-size: .8rem; font-weight: 900; color: var(--slate-400);
+    border: 1px solid var(--slate-200);
+  }
+  .month-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+  .month-event-item {
+    padding: 1rem; border-radius: 1.2rem; cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .2s;
+  }
+  .month-event-item:hover { transform: translateY(-2px); }
+  .month-event-date { font-size: .75rem; font-weight: 800; opacity: .6; margin-bottom: .25rem; }
+  .month-event-name { font-size: .95rem; font-weight: 900; color: var(--slate-800); }
+  .empty-msg { padding: 2.5rem 0; text-align: center; color: var(--slate-300); font-weight: 700; font-style: italic; }
+
+  /* ---------- LIST ---------- */
+  .list-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .event-card { overflow: hidden; }
+  .event-bar { height: 6px; }
+  .event-body { padding: 1.5rem; }
+  .event-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+  .pill {
+    display: inline-flex; align-items: center;
+    border-radius: .75rem; padding: .3rem .9rem;
+    font-size: .8rem; font-weight: 800;
+    border: 1px solid transparent;
+  }
+  .event-actions { display: flex; gap: .4rem; }
+  .icon-btn {
+    width: 2.4rem; height: 2.4rem; border-radius: .75rem; border: none;
+    background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--slate-500); transition: background .15s, color .15s;
+  }
+  .icon-btn:hover { background: var(--violet-100); color: var(--violet-600); }
+  .icon-btn.danger:hover { background: #fff1f2; color: var(--rose-600); }
+  .event-name { font-size: 1.3rem; font-weight: 900; color: var(--slate-900); margin-bottom: .2rem; }
+  .event-date { font-size: .85rem; font-weight: 700; color: var(--slate-400); margin-bottom: 1rem; }
+  .tags-wrap { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+  .tag {
+    background: rgba(255,255,255,.8); border: 2px solid var(--slate-100);
+    padding: .2rem .75rem; border-radius: .5rem; font-size: .75rem; font-weight: 900; color: var(--slate-500);
+  }
+  .event-note {
+    font-size: .85rem; font-weight: 500; color: var(--slate-600);
+    background: rgba(255,255,255,.4); padding: .75rem; border-radius: .75rem;
+    border: 1px solid rgba(255,255,255,.6); line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .empty-search { grid-column: 1/-1; padding: 5rem 0; text-align: center; }
+  .empty-search p { font-size: 1.2rem; font-weight: 900; color: var(--slate-400); margin-top: 1rem; }
+
+  /* ---------- CALENDAR ---------- */
+  .cal-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; }
+  .cal-title { font-size: 2.5rem; font-weight: 900; color: var(--slate-800); }
+  .cal-nav { display: flex; align-items: center; gap: 1rem; background: var(--slate-100); padding: .5rem; border-radius: 1.2rem; }
+  .cal-nav button { width: 2.5rem; height: 2.5rem; border-radius: .75rem; border: none; cursor: pointer; background: transparent; color: var(--slate-600); display: flex; align-items: center; justify-content: center; transition: background .15s; }
+  .cal-nav button:hover { background: var(--white); }
+  .cal-nav span { font-size: .8rem; font-weight: 900; color: var(--slate-400); width: 6rem; text-align: center; }
+  .cal-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 1rem; margin-bottom: .5rem; }
+  .cal-day-label { text-align: center; font-size: .75rem; font-weight: 900; text-transform: uppercase; color: var(--slate-400); padding-bottom: 1rem; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: .75rem; }
+  .cal-cell {
+    min-height: 140px; border-radius: 1.5rem; border: 2px solid;
+    padding: .75rem; transition: border-color .2s;
+  }
+  .cal-cell.empty { background: var(--slate-50); border-color: transparent; opacity: .4; }
+  .cal-cell.day { background: var(--white); border-color: var(--slate-100); }
+  .cal-cell.day:hover { border-color: var(--violet-200); }
+  .cal-cell.drag-over { border-color: var(--violet-600) !important; background: var(--violet-50) !important; }
+  .cal-day-num { font-size: 1rem; font-weight: 900; color: var(--slate-300); margin-bottom: .5rem; }
+  .cal-events { display: flex; flex-direction: column; gap: .4rem; }
+  .cal-event-chip {
+    font-size: .7rem; font-weight: 900; padding: .4rem .6rem; border-radius: .75rem;
+    border: 2px solid rgba(255,255,255,.8); cursor: pointer;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    transition: transform .15s;
+  }
+  .cal-event-chip:hover { transform: scale(1.04); }
+  .cal-event-chip.draggable { cursor: move; outline: 2px solid rgba(124,58,237,.2); outline-offset: 2px; }
+
+  /* ---------- FORM ---------- */
+  .form-wrap { max-width: 768px; margin: auto; }
+  .form-card { padding: 2.5rem; }
+  .form-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+  .form-head h2 { font-size: 2rem; font-weight: 900; color: var(--slate-900); }
+  .form-head p { font-size: .95rem; font-weight: 700; color: var(--slate-400); margin-top: .4rem; }
+  .form-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .form-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+  .form-group { display: flex; flex-direction: column; gap: .5rem; }
+  .form-group label { font-size: .7rem; font-weight: 900; color: var(--slate-400); text-transform: uppercase; letter-spacing: .12em; }
+  .form-group input, .form-group select, .form-group textarea {
+    font-family: inherit; border: 2px solid var(--slate-100); border-radius: 1rem;
+    background: rgba(248,250,252,.5); color: var(--slate-800); font-weight: 700;
+    outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--violet-300); }
+  .form-group input, .form-group select { height: 3.5rem; padding: 0 1.25rem; font-size: .95rem; }
+  .form-group textarea { padding: 1.25rem; font-size: .95rem; line-height: 1.6; resize: vertical; }
+  .field-row { display: flex; justify-content: space-between; align-items: center; }
+  .ai-btn {
+    font-family: inherit; border: none; cursor: pointer; border-radius: .75rem;
+    padding: .4rem 1rem; font-size: .75rem; font-weight: 900;
+    display: flex; align-items: center; gap: .4rem; transition: all .15s;
+  }
+  .ai-btn.violet { background: var(--violet-600); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.3); }
+  .ai-btn.violet:hover { background: var(--violet-700); }
+  .ai-btn.amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .ai-btn.amber:hover { background: #fef3c7; }
+  .ai-btn.tags { background: var(--violet-50); color: var(--violet-600); }
+  .ai-btn.tags:hover { background: var(--violet-100); }
+  .ai-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .form-actions { display: flex; gap: 1rem; padding-top: 2rem; flex-wrap: wrap; }
+  .btn-save {
+    flex: 1; min-width: 200px; height: 4rem;
+    background: var(--slate-900); color: #fff; border: none; cursor: pointer;
+    border-radius: 1rem; font-family: inherit; font-size: 1rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); transition: all .2s;
+  }
+  .btn-save:hover { background: var(--violet-600); }
+  .btn-save:active { transform: scale(.96); }
+  .btn-cancel {
+    padding: 0 2.5rem; height: 4rem; border: 2px solid var(--slate-100); border-radius: 1rem;
+    background: transparent; cursor: pointer; font-family: inherit; font-size: 1rem; font-weight: 900; color: var(--slate-400);
+    transition: background .15s;
+  }
+  .btn-cancel:hover { background: var(--slate-50); }
+  .ai-spinner {
+    width: 2rem; height: 2rem; border-radius: 999px;
+    border: 3px solid var(--violet-200); border-top-color: var(--violet-600);
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- MODAL ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(15,23,42,.7); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .modal-card { width: 100%; max-width: 440px; padding: 2.5rem; }
+  .modal-icon {
+    width: 4rem; height: 4rem; background: #fff1f2; border-radius: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--rose-600); margin-bottom: 1.5rem;
+  }
+  .modal-card h3 { font-size: 1.8rem; font-weight: 900; color: var(--slate-900); }
+  .modal-card p { color: var(--slate-500); font-size: 1rem; font-weight: 700; margin-top: .75rem; line-height: 1.6; }
+  .modal-card p span { color: var(--rose-600); }
+  .modal-actions { margin-top: 2.5rem; display: flex; flex-direction: column; gap: .75rem; }
+  .btn-confirm-del {
+    width: 100%; padding: 1.25rem; background: var(--rose-600); color: #fff;
+    border: none; cursor: pointer; font-family: inherit; font-size: 1rem; font-weight: 900;
+    border-radius: 1rem; box-shadow: 0 8px 20px rgba(225,29,72,.3); transition: background .15s;
+  }
+  .btn-confirm-del:hover { background: var(--rose-700); }
+  .btn-cancel-del {
+    width: 100%; padding: 1.25rem; background: transparent; color: var(--slate-400);
+    border: none; cursor: pointer; font-family: inherit; font-size: 1rem; font-weight: 900;
+  }
+
+  /* ---------- MOBILE NAV ---------- */
+  .mobile-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: var(--white); border-top: 2px solid var(--slate-100);
+    padding: 0 2rem; height: 5rem;
+    align-items: center; justify-content: space-between;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.05);
+  }
+  .mobile-nav .icon-btn { width: 3rem; height: 3rem; color: var(--slate-400); border-radius: 1rem; }
+  .mobile-nav .icon-btn.active { color: var(--violet-600); }
+  .mobile-nav .divider { width: 1px; height: 2rem; background: var(--slate-100); }
+  .mobile-nav .btn-new-mobile {
+    width: 3rem; height: 3rem; border-radius: 1rem; border: none;
+    background: var(--slate-100); color: var(--slate-400); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
+  }
+  .mobile-nav .btn-new-mobile.active { background: var(--violet-600); color: #fff; }
+
+  /* ---------- ANIMATIONS ---------- */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-in { animation: fadeIn .4s cubic-bezier(.16,1,.3,1) forwards; }
+
+  /* ---------- CATEGORY STYLES ---------- */
+  .cat-เทศกาลใหญ่ { background: var(--rose-50); border-color: var(--rose-200) !important; }
+  .cat-เทศกาลใหญ่ .event-bar { background: var(--rose-500); }
+  .cat-เทศกาลใหญ่ .pill { background: var(--rose-100); color: #be123c; }
+  .cat-เทศกาลใหญ่ .month-event-item { background: var(--rose-50); border-color: var(--white) !important; }
+  .cat-ความรัก { background: var(--pink-50); border-color: var(--pink-200) !important; }
+  .cat-ความรัก .event-bar { background: var(--pink-500); }
+  .cat-ความรัก .pill { background: var(--pink-100); color: var(--pink-700); }
+  .cat-ความรัก .month-event-item { background: var(--pink-50); border-color: var(--white) !important; }
+  .cat-เทศกาลญี่ปุ่น { background: var(--indigo-50); border-color: var(--indigo-200) !important; }
+  .cat-เทศกาลญี่ปุ่น .event-bar { background: var(--indigo-500); }
+  .cat-เทศกาลญี่ปุ่น .pill { background: var(--indigo-100); color: var(--indigo-700); }
+  .cat-เทศกาลญี่ปุ่น .month-event-item { background: var(--indigo-50); border-color: var(--white) !important; }
+  .cat-ไวรัล { background: var(--amber-50); border-color: var(--amber-200) !important; }
+  .cat-ไวรัล .event-bar { background: var(--amber-500); }
+  .cat-ไวรัล .pill { background: var(--amber-100); color: var(--amber-700); }
+  .cat-ไวรัล .month-event-item { background: var(--amber-50); border-color: var(--white) !important; }
+  .cat-วันสำคัญไทย { background: var(--emerald-50); border-color: var(--emerald-200) !important; }
+  .cat-วันสำคัญไทย .event-bar { background: var(--emerald-500); }
+  .cat-วันสำคัญไทย .pill { background: var(--emerald-100); color: var(--emerald-700); }
+  .cat-วันสำคัญไทย .month-event-item { background: var(--emerald-50); border-color: var(--white) !important; }
+  .cat-วันครบรอบ { background: var(--sky-50); border-color: var(--sky-200) !important; }
+  .cat-วันครบรอบ .event-bar { background: var(--sky-500); }
+  .cat-วันครบรอบ .pill { background: var(--sky-100); color: var(--sky-700); }
+  .cat-วันครบรอบ .month-event-item { background: var(--sky-50); border-color: var(--white) !important; }
+
+  /* cat-chip in calendar */
+  .chip-เทศกาลใหญ่ { background: var(--rose-50); border-color: var(--white); color: #be123c; }
+  .chip-ความรัก { background: var(--pink-50); color: var(--pink-700); }
+  .chip-เทศกาลญี่ปุ่น { background: var(--indigo-50); color: var(--indigo-700); }
+  .chip-ไวรัล { background: var(--amber-50); color: var(--amber-700); }
+  .chip-วันสำคัญไทย { background: var(--emerald-50); color: var(--emerald-700); }
+  .chip-วันครบรอบ { background: var(--sky-50); color: var(--sky-700); }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 1024px) {
+    nav.tabs { display: none; }
+    .mobile-nav { display: flex; }
+    body { padding-bottom: 6rem; }
+  }
+  @media (max-width: 640px) {
+    .form-grid2, .form-grid3 { grid-template-columns: 1fr; }
+    .cal-grid, .cal-week { gap: .3rem; }
+    .cal-cell { min-height: 80px; padding: .4rem; }
+    .cal-day-num { font-size: .75rem; }
+    .cal-event-chip { font-size: .6rem; padding: .2rem .4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">
+        <i data-lucide="calendar" style="width:28px;height:28px"></i>
+      </div>
+      <div>
+        <div class="brand-title">Event Simulator <span>2569</span></div>
+        <div class="brand-sub">ระบบจำลองแผนกิจกรรมประจำปี</div>
+      </div>
+    </div>
+
+    <nav class="tabs" id="mainNav">
+      <button class="active" data-tab="overview">
+        <i data-lucide="layout-grid" style="width:18px;height:18px"></i> ภาพรวมทั้งปี
+      </button>
+      <button data-tab="list">
+        <i data-lucide="list" style="width:18px;height:18px"></i> รายการทั้งหมด
+      </button>
+      <button data-tab="calendar">
+        <i data-lucide="calendar" style="width:18px;height:18px"></i> ปฏิทินรายเดือน
+      </button>
+    </nav>
+
+    <button class="btn-new" id="btnNew">
+      <i data-lucide="plus" style="width:20px;height:20px"></i> สร้างใหม่
+    </button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="search-wrap">
+      <i data-lucide="search" class="search-icon" style="width:24px;height:24px"></i>
+      <input type="text" id="searchInput" placeholder="พิมพ์เพื่อค้นหาอีเวนต์..." />
+    </div>
+    <select id="monthSelect">
+      <option value="0">ทุกเดือน</option>
+      <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option>
+      <option value="3">มีนาคม</option><option value="4">เมษายน</option>
+      <option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+      <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option>
+      <option value="9">กันยายน</option><option value="10">ตุลาคม</option>
+      <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+    </select>
+    <select id="catSelect">
+      <option>ทั้งหมด</option>
+      <option>เทศกาลใหญ่</option><option>ความรัก</option>
+      <option>เทศกาลญี่ปุ่น</option><option>ไวรัล</option>
+      <option>วันสำคัญไทย</option><option>วันครบรอบ</option>
+    </select>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content" class="animate-in"></div>
+</main>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="icon-btn active" data-tab="overview" id="mob-overview">
+    <i data-lucide="layout-grid" style="width:22px;height:22px"></i>
+  </button>
+  <button class="icon-btn" data-tab="list" id="mob-list">
+    <i data-lucide="list" style="width:22px;height:22px"></i>
+  </button>
+  <button class="icon-btn" data-tab="calendar" id="mob-calendar">
+    <i data-lucide="calendar" style="width:22px;height:22px"></i>
+  </button>
+  <div class="divider"></div>
+  <button class="btn-new-mobile" id="mob-new">
+    <i data-lucide="plus" style="width:22px;height:22px"></i>
+  </button>
+</nav>
+
+<!-- DELETE MODAL -->
+<div class="modal-backdrop" id="deleteModal" style="display:none">
+  <div class="card modal-card animate-in">
+    <div class="modal-icon"><i data-lucide="trash-2" style="width:28px;height:28px"></i></div>
+    <h3>ต้องการลบใช่ไหม?</h3>
+    <p>อีเวนต์ <span id="deleteModalName"></span> จะถูกลบถาวรจากรายการของคุณ</p>
+    <div class="modal-actions">
+      <button class="btn-confirm-del" id="confirmDelBtn">ยืนยันลบทิ้ง</button>
+      <button class="btn-cancel-del" id="cancelDelBtn">ไม่ต้องลบ ย้อนกลับ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const MONTHS_LABEL = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+const WEEK_LABELS = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสฯ","ศุกร์","เสาร์"];
+
+const BASE_EVENTS = [
+  {id:1,name:"วันปีใหม่",date:"1 มกราคม",month:1,day:1,category:"เทศกาลใหญ่",tags:["ปีใหม่","Login Bonus","Top-up"],note:"เหมาะกับอีเวนต์เริ่มต้นปี, แพ็กเกจเติมเงิน, รีเซ็ตมิชชัน"},
+  {id:2,name:"วันเด็ก",date:"เสาร์ที่ 2 ของมกราคม",month:1,day:10,category:"วันสำคัญไทย",tags:["เด็ก","ฟรีของรางวัล","Mini Game"],note:"เหมาะกับกิจกรรมสายแจก, community event, mission น่ารัก ๆ"},
+  {id:3,name:"ตรุษจีน",date:"มกราคม - กุมภาพันธ์",month:2,day:5,category:"เทศกาลใหญ่",tags:["ตรุษจีน","Lucky Draw","Red Theme"],note:"เหมาะกับสุ่มของพรีเมียม, theme สีแดง-ทอง, login event"},
+  {id:4,name:"Valentine's Day",date:"14 กุมภาพันธ์",month:2,day:14,category:"ความรัก",tags:["คู่รัก","Gift","Couple Mission"],note:"เหมาะกับของขวัญ, costume คู่, ส่งของให้เพื่อน"},
+  {id:5,name:"White Day",date:"14 มีนาคม",month:3,day:14,category:"ความรัก",tags:["ความรัก","ของขวัญ","Follow-up"],note:"เหมาะเป็นอีเวนต์ต่อเนื่องหลังวาเลนไทน์"},
+  {id:6,name:"Hinamatsuri",date:"3 มีนาคม",month:3,day:3,category:"เทศกาลญี่ปุ่น",tags:["ญี่ปุ่น","Cosmetic","Limited"],note:"เหมาะกับสกินธีมญี่ปุ่น, อีเวนต์ภาพลักษณ์สวยหวาน"},
+  {id:7,name:"April Fool's Day",date:"1 เมษายน",month:4,day:1,category:"ไวรัล",tags:["Meme","Fun","Social"],note:"เหมาะกับมุกในเกม, UI joke, quest พิเศษแบบขำ ๆ"},
+  {id:8,name:"Easter",date:"มีนาคม - เมษายน",month:4,day:9,category:"ไวรัล",tags:["Egg Hunt","ไข่อีสเตอร์","Collection"],note:"เหมาะกับกิจกรรมล่าไข่, สะสม item, random egg box"},
+  {id:9,name:"สงกรานต์",date:"13 - 15 เมษายน",month:4,day:13,category:"วันสำคัญไทย",tags:["ไทย","น้ำ","Festival"],note:"เหมาะกับ theme น้ำ, limited costume, ยิงโปรโมตใหญ่"},
+  {id:10,name:"Kodomo no Hi",date:"5 พฤษภาคม",month:5,day:5,category:"เทศกาลญี่ปุ่น",tags:["ญี่ปุ่น","เด็ก","Mini Event"],note:"ทำเป็น event เบา ๆ แทรกระหว่างเดือนใหญ่ได้"},
+  {id:11,name:"ครบรอบ 3 เดือน",date:"11 มิถุนายน",month:6,day:11,category:"วันครบรอบ",tags:["Anniversary","Top-up","Big Event"],note:"เหมาะกับอีเวนต์ฉลอง milestone, package ใหญ่, GM campaign"},
+  {id:12,name:"Tanabata",date:"7 กรกฎาคม",month:7,day:7,category:"เทศกาลญี่ปุ่น",tags:["อธิษฐาน","Theme ญี่ปุ่น","Story Event"],note:"เหมาะกับเนื้อเรื่อง, mission เขียนคำขอ, limited decor"},
+  {id:13,name:"วันแม่",date:"12 สิงหาคม",month:8,day:12,category:"วันสำคัญไทย",tags:["ครอบครัว","Gift","Special Mission"],note:"เหมาะกับภารกิจส่งของขวัญ, reward โทนอบอุ่น"},
+  {id:14,name:"เทศกาลฤดูร้อน (Obon)",date:"สิงหาคม",month:8,day:20,category:"เทศกาลญี่ปุ่น",tags:["Matsuri","Summer","Costume"],note:"เหมาะกับ costume yukata, mini game งานวัด"},
+  {id:15,name:"ครบรอบ 6 เดือน",date:"11 กันยายน",month:9,day:11,category:"วันครบรอบ",tags:["Anniversary","Mid-Year","Reward Boost"],note:"เหมาะกับแคมเปญกลางปี, check-in ใหญ่, top spender event"},
+  {id:16,name:"Halloween",date:"31 ตุลาคม",month:10,day:31,category:"เทศกาลใหญ่",tags:["ผี","Costume","Gacha"],note:"เป็นช่วงที่ขาย cosmetic และ limited gacha ได้ดีมาก"},
+  {id:17,name:"Pocky Day",date:"11 พฤศจิกายน",month:11,day:11,category:"ไวรัล",tags:["11.11","Snack","Social"],note:"เหมาะกับ social post, login reward, mini package"},
+  {id:18,name:"ลอยกระทง",date:"พฤศจิกายน",month:11,day:15,category:"วันสำคัญไทย",tags:["ไทย","แสงไฟ","Floating Festival"],note:"เหมาะกับ visual theme สวย ๆ, mission ถ่ายภาพ, collection"},
+  {id:19,name:"ครบรอบ 9 เดือน",date:"11 ธันวาคม",month:12,day:11,category:"วันครบรอบ",tags:["Anniversary","Milestone","Big Sale"],note:"เหมาะกับโปรใหญ่ก่อนสิ้นปี, สะสมยอดใช้จ่าย, special ranking"},
+  {id:20,name:"Christmas",date:"25 ธันวาคม",month:12,day:25,category:"เทศกาลใหญ่",tags:["Christmas","Snow","Gift Box"],note:"เหมาะกับกล่องสุ่ม, costume winter, surprise login"},
+  {id:21,name:"New Year Countdown",date:"31 ธันวาคม",month:12,day:31,category:"เทศกาลใหญ่",tags:["Countdown","Celebration","Limited"],note:"เหมาะกับของรางวัลส่งท้ายปีและกิจกรรม countdown"},
+  {id:22,name:"วันหยุดพิเศษ ครม.",date:"2 มกราคม 2569",month:1,day:2,category:"วันสำคัญไทย",tags:["Holiday","Login","Boost"],note:"เหมาะกับกิจกรรมวันหยุดต่อเนื่อง เช่น Login Bonus, EXP Boost"},
+  {id:23,name:"วันครู",date:"16 มกราคม",month:1,day:16,category:"วันสำคัญไทย",tags:["Teacher Day","Community","Gift"],note:"เหมาะกับกิจกรรมขอบคุณครู/เมนเทอร์ในเกม แจกของขวัญ"},
+  {id:24,name:"วันมาฆบูชา",date:"3 กุมภาพันธ์ 2569",month:2,day:3,category:"วันสำคัญไทย",tags:["Buddhist","Login","Reward"],note:"เหมาะกับกิจกรรมสงบ ๆ เช่น Login Reward, สะสมแต้ม"},
+  {id:25,name:"วันจักรี",date:"6 เมษายน 2569",month:4,day:6,category:"วันสำคัญไทย",tags:["Holiday","Special Reward","Boost"],note:"เหมาะกับกิจกรรมวันหยุด แจกโบนัส EXP หรือภารกิจพิเศษ"},
+  {id:26,name:"วันสงกรานต์",date:"14 เมษายน 2569",month:4,day:14,category:"วันสำคัญไทย",tags:["Songkran","Water","Festival"],note:"เหมาะกับกิจกรรมธีมน้ำ, แจกของเทศกาล"},
+  {id:27,name:"วันสงกรานต์ (วันที่ 3)",date:"15 เมษายน 2569",month:4,day:15,category:"วันสำคัญไทย",tags:["Songkran","Water","Festival"],note:"เหมาะกับวันที่ 3 ของอีเวนต์สงกรานต์"},
+  {id:28,name:"วันฉัตรมงคล",date:"4 พฤษภาคม 2569",month:5,day:4,category:"วันสำคัญไทย",tags:["Holiday","Login","Special"],note:"เหมาะกับ Login Bonus หรือ Special Mission"},
+  {id:29,name:"วันวิสาขบูชา",date:"31 พฤษภาคม 2569",month:5,day:31,category:"วันสำคัญไทย",tags:["Buddhist","Collection","Login"],note:"เหมาะกับกิจกรรมสะสมแต้ม, login event"},
+  {id:30,name:"ชดเชยวันวิสาขบูชา",date:"1 มิถุนายน 2569",month:6,day:1,category:"วันสำคัญไทย",tags:["Holiday","Compensation","Boost"],note:"เหมาะกับกิจกรรมต่อเนื่องหลังวันหยุด"},
+  {id:31,name:"วันเฉลิมฯ พระบรมราชินี",date:"3 มิถุนายน 2569",month:6,day:3,category:"วันสำคัญไทย",tags:["Holiday","Special Reward","Login"],note:"เหมาะกับแจกของพิเศษประจำเซิร์ฟเวอร์ไทย"},
+  {id:32,name:"วันเฉลิมฯ ร.10",date:"28 กรกฎาคม 2569",month:7,day:28,category:"วันสำคัญไทย",tags:["Holiday","Special Package","Reward"],note:"เหมาะกับกิจกรรมพิเศษ, Special Package"},
+  {id:33,name:"วันอาสาฬหบูชา",date:"29 กรกฎาคม 2569",month:7,day:29,category:"วันสำคัญไทย",tags:["Buddhist","Daily Mission","Reward"],note:"เหมาะกับ mission รายวัน หรือกิจกรรมสะสมแต้ม"},
+  {id:34,name:"วันเข้าพรรษา",date:"30 กรกฎาคม 2569",month:7,day:30,category:"วันสำคัญไทย",tags:["Buddhist","Collection","Login"],note:"เหมาะกับกิจกรรมสะสมเทียน/แต้ม/ไอเทม"},
+  {id:35,name:"วันนวมินทรมหาราช",date:"13 ตุลาคม 2569",month:10,day:13,category:"วันสำคัญไทย",tags:["Holiday","Memorial","Login"],note:"เหมาะกับ login reward หรือภารกิจวันหยุดแบบเรียบง่าย"},
+  {id:36,name:"วันปิยมหาราช",date:"23 ตุลาคม 2569",month:10,day:23,category:"วันสำคัญไทย",tags:["Holiday","Reward","Mission"],note:"เหมาะกับแจก login bonus หรือกิจกรรมวันหยุด"},
+  {id:37,name:"ชดเชยวันพ่อแห่งชาติ",date:"7 ธันวาคม 2569",month:12,day:7,category:"วันสำคัญไทย",tags:["Holiday","Family","Boost"],note:"เหมาะกับกิจกรรมต่อเนื่องจากวันพ่อ"},
+  {id:38,name:"วันรัฐธรรมนูญ",date:"10 ธันวาคม 2569",month:12,day:10,category:"วันสำคัญไทย",tags:["Holiday","Weekend Event","Boost"],note:"เหมาะกับกิจกรรมฟาร์มช่วงวันหยุด"},
+  {id:39,name:"วันสิ้นปี",date:"31 ธันวาคม 2569",month:12,day:31,category:"วันสำคัญไทย",tags:["Year End","Countdown","Reward"],note:"เหมาะกับอีเวนต์ส่งท้ายปี, ของรางวัลพิเศษ"}
+].map(e=>({...e,sourceType:"base",isCustom:false}));
+
+/* ============================================================
+   STATE
+============================================================ */
+let activeTab = "overview";
+let activeCategory = "ทั้งหมด";
+let monthFilter = 0;
+let searchQuery = "";
+let calendarMonth = new Date().getMonth() + 1;
+let customEvents = [];
+let deletedBaseIds = [];
+let pendingDeleteEvent = null;
+let editingForm = null; // null = new form
+let isAiLoading = false;
+let dragKey = null;
+
+// Load from localStorage
+try {
+  const c = localStorage.getItem("game-events-custom-v2");
+  const d = localStorage.getItem("game-events-deleted-v2");
+  if (c) customEvents = JSON.parse(c);
+  if (d) deletedBaseIds = JSON.parse(d);
+} catch(e) {}
+
+function save() {
+  localStorage.setItem("game-events-custom-v2", JSON.stringify(customEvents));
+  localStorage.setItem("game-events-deleted-v2", JSON.stringify(deletedBaseIds));
+}
+
+function getAllEvents() {
+  const base = BASE_EVENTS.filter(e => !deletedBaseIds.includes(e.id));
+  const custom = customEvents.map(e => ({...e, isCustom:true, sourceType:"custom"}));
+  return [...base, ...custom].sort((a,b) => a.month-b.month || (a.day||1)-(b.day||1));
+}
+
+function getKey(e) { return `${e.sourceType}-${e.id}`; }
+
+function getFiltered() {
+  const q = searchQuery.toLowerCase();
+  return getAllEvents().filter(e => {
+    const mCat = activeCategory === "ทั้งหมด" || e.category === activeCategory;
+    const mMon = monthFilter === 0 || e.month === monthFilter;
+    const mSearch = !q || e.name.toLowerCase().includes(q) || e.tags.some(t=>t.toLowerCase().includes(q));
+    return mCat && mMon && mSearch;
+  });
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function render() {
+  const content = document.getElementById("content");
+  const toolbar = document.getElementById("toolbar");
+  content.className = "animate-in";
+  // re-trigger animation
+  void content.offsetWidth;
+
+  toolbar.style.display = (activeTab === "list" || activeTab === "overview") ? "flex" : "none";
+
+  if (activeTab === "overview") renderOverview(content);
+  else if (activeTab === "list") renderList(content);
+  else if (activeTab === "calendar") renderCalendar(content);
+  else if (activeTab === "form") renderForm(content);
+
+  updateNavActive();
+  lucide.createIcons();
+}
+
+function iconSVG(name, size=20) {
+  return `<i data-lucide="${name}" style="width:${size}px;height:${size}px;display:inline-block;vertical-align:middle"></i>`;
+}
+
+/* ---- OVERVIEW ---- */
+function renderOverview(el) {
+  const evs = getAllEvents();
+  let html = `<div class="overview-grid">`;
+  for (let m=1; m<=12; m++) {
+    const mEvs = evs.filter(e=>e.month===m);
+    html += `<div class="card month-card">
+      <div class="month-header">
+        <h3>${MONTHS_LABEL[m]}</h3>
+        <span class="month-count">${mEvs.length}</span>
+      </div>
+      <div class="month-body">`;
+    if (!mEvs.length) {
+      html += `<div class="empty-msg">ไม่มีข้อมูลอีเวนต์</div>`;
+    } else {
+      mEvs.forEach(ev => {
+        html += `<div class="month-event-item cat-${ev.category}" data-key="${getKey(ev)}" onclick="startEdit('${getKey(ev)}')">
+          <div class="month-event-date">${ev.date}</div>
+          <div class="month-event-name">${ev.name}</div>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ---- LIST ---- */
+function renderList(el) {
+  const evs = getFiltered();
+  if (!evs.length) {
+    el.innerHTML = `<div class="list-grid"><div class="empty-search">
+      ${iconSVG("search",48)}
+      <p>ไม่พบอีเวนต์ที่คุณกำลังตามหา</p>
+    </div></div>`;
+    lucide.createIcons();
+    return;
+  }
+  let html = `<div class="list-grid">`;
+  evs.forEach(ev => {
+    const key = getKey(ev);
+    const tagsHtml = ev.tags.map(t=>`<span class="tag">#${t}</span>`).join("");
+    html += `<div class="card event-card cat-${ev.category}">
+      <div class="event-bar"></div>
+      <div class="event-body">
+        <div class="event-top">
+          <span class="pill">${ev.category}</span>
+          <div class="event-actions">
+            <button class="icon-btn" onclick="startEdit('${key}')" title="แก้ไข">${iconSVG("edit-2")}</button>
+            <button class="icon-btn danger" onclick="askDelete('${key}')" title="ลบ">${iconSVG("trash-2")}</button>
+          </div>
+        </div>
+        <div class="event-name">${ev.name}</div>
+        <div class="event-date">${ev.date}</div>
+        <div class="tags-wrap">${tagsHtml}</div>
+        <div class="event-note">${ev.note||""}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ---- CALENDAR ---- */
+function renderCalendar(el) {
+  const year = 2026;
+  const daysInMonth = new Date(year, calendarMonth, 0).getDate();
+  const firstDay = new Date(year, calendarMonth-1, 1).getDay();
+  const allEvs = getAllEvents();
+
+  let weekHtml = WEEK_LABELS.map(w=>`<div class="cal-day-label">${w}</div>`).join("");
+  let cells = [];
+  for (let i=0; i<firstDay; i++) cells.push({type:"empty"});
+  for (let d=1; d<=daysInMonth; d++) {
+    const dayEvs = allEvs.filter(e=>e.month===calendarMonth && e.day===d);
+    cells.push({type:"day", day:d, evs:dayEvs});
+  }
+  while (cells.length%7!==0) cells.push({type:"empty"});
+
+  let gridHtml = cells.map((c,i) => {
+    if (c.type==="empty") return `<div class="cal-cell empty" data-cell-idx="${i}"></div>`;
+    const evChips = c.evs.map(ev => {
+      const key = getKey(ev);
+      const draggable = ev.sourceType==="custom";
+      return `<div class="cal-event-chip chip-${ev.category} ${draggable?"draggable":""}"
+        ${draggable?`draggable="true" data-drag-key="${key}" ondragstart="onDragStart(event,'${key}')"`:""} 
+        onclick="startEdit('${key}')">${ev.name}</div>`;
+    }).join("");
+    return `<div class="cal-cell day" data-day="${c.day}" data-cell-idx="${i}"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="onDrop(event,${calendarMonth},${c.day})">
+      <div class="cal-day-num">${c.day}</div>
+      <div class="cal-events">${evChips}</div>
+    </div>`;
+  }).join("");
+
+  el.innerHTML = `<div class="card" style="padding:2rem">
+    <div class="cal-header">
+      <div class="cal-title">${MONTHS_LABEL[calendarMonth]} 2569</div>
+      <div class="cal-nav">
+        <button onclick="calPrev()">${iconSVG("chevron-left")}</button>
+        <span>เปลี่ยนเดือน</span>
+        <button onclick="calNext()">${iconSVG("chevron-right")}</button>
+      </div>
+    </div>
+    <div class="cal-week">${weekHtml}</div>
+    <div class="cal-grid">${gridHtml}</div>
+  </div>`;
+}
+
+/* ---- FORM ---- */
+function renderForm(el) {
+  const f = editingForm || {name:"",date:"",month:1,day:1,category:"เทศกาลใหญ่",tags:"",note:""};
+  const cats = ["เทศกาลใหญ่","ความรัก","เทศกาลญี่ปุ่น","ไวรัล","วันสำคัญไทย","วันครบรอบ"];
+  const catOpts = cats.map(c=>`<option value="${c}" ${f.category===c?"selected":""}>${c}</option>`).join("");
+  const monthOpts = MONTHS_LABEL.slice(1).map((m,i)=>`<option value="${i+1}" ${f.month===i+1?"selected":""}>${m}</option>`).join("");
+  const isEdit = !!editingForm?.editKey;
+
+  el.innerHTML = `<div class="form-wrap">
+    <div class="card form-card">
+      <div class="form-head">
+        <div>
+          <h2>${isEdit?"แก้ไขข้อมูลอีเวนต์":"สร้างอีเวนต์ใหม่"}</h2>
+          <p>กรอกรายละเอียดเพื่อวางแผนแคมเปญของคุณ</p>
+        </div>
+        <div id="aiSpinner" style="display:none"><div class="ai-spinner"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2rem">
+        <div class="form-grid2">
+          <div class="form-group">
+            <label>ชื่ออีเวนต์</label>
+            <input type="text" id="f-name" value="${esc(f.name)}" placeholder="เช่น ฉลองครบรอบ 1 ปี" />
+          </div>
+          <div class="form-group">
+            <label>วันที่แสดง (ข้อความ)</label>
+            <input type="text" id="f-date" value="${esc(f.date)}" placeholder="เช่น 1 มกราคม - 5 มกราคม" />
+          </div>
+        </div>
+        <div class="form-grid3">
+          <div class="form-group">
+            <label>เดือน</label>
+            <select id="f-month">${monthOpts}</select>
+          </div>
+          <div class="form-group">
+            <label>วันที่ (ตัวเลข)</label>
+            <input type="number" id="f-day" min="1" max="31" value="${f.day}" />
+          </div>
+          <div class="form-group" style="grid-column:span 1">
+            <label>หมวดหมู่</label>
+            <select id="f-cat">${catOpts}</select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="field-row" style="margin-bottom:.5rem">
+            <label>แท็ก (คั่นด้วยจุลภาค)</label>
+            <button class="ai-btn tags" id="aiTagsBtn" onclick="aiTags()">
+              ${iconSVG("sparkles",14)} ให้ AI ช่วยคิดแท็ก
+            </button>
+          </div>
+          <input type="text" id="f-tags" value="${esc(f.tags)}" placeholder="เช่น gacha, limited, promotion" />
+        </div>
+        <div class="form-group">
+          <div class="field-row" style="margin-bottom:.5rem">
+            <label>รายละเอียดและหมายเหตุ</label>
+            <div style="display:flex;gap:.5rem">
+              <button class="ai-btn amber" id="aiIdeaBtn" onclick="aiIdeas()">
+                ${iconSVG("lightbulb",16)} ขอไอเดีย AI
+              </button>
+              <button class="ai-btn violet" id="aiPolishBtn" onclick="aiPolish()">
+                ${iconSVG("sparkles",16)} เกลาภาษา AI
+              </button>
+            </div>
+          </div>
+          <textarea id="f-note" rows="8" placeholder="พิมพ์รายละเอียดอีเวนต์ที่นี่...">${esc(f.note)}</textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="handleSubmit()">
+            ${iconSVG("save")} ${isEdit?"บันทึกการแก้ไข":"สร้างอีเวนต์เดี๋ยวนี้"}
+          </button>
+          <button class="btn-cancel" onclick="cancelForm()">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* ============================================================
+   HANDLERS
+============================================================ */
+function setTab(tab) {
+  activeTab = tab;
+  render();
+}
+
+function updateNavActive() {
+  document.querySelectorAll("#mainNav button").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === activeTab);
+  });
+  ["overview","list","calendar"].forEach(t => {
+    const b = document.getElementById("mob-"+t);
+    if (b) b.classList.toggle("active", t===activeTab);
+  });
+  const mobNew = document.getElementById("mob-new");
+  if (mobNew) mobNew.classList.toggle("active", activeTab==="form");
+}
+
+function startEdit(key) {
+  const evs = getAllEvents();
+  const ev = evs.find(e=>getKey(e)===key);
+  if (!ev) return;
+  editingForm = {
+    editKey: key, sourceType: ev.sourceType, sourceId: ev.id,
+    name: ev.name, date: ev.date, month: ev.month, day: ev.day||1,
+    category: ev.category, tags: ev.tags.join(", "), note: ev.note||""
+  };
+  setTab("form");
+}
+
+function handleSubmit() {
+  const name = document.getElementById("f-name")?.value?.trim();
+  const date = document.getElementById("f-date")?.value?.trim();
+  if (!name || !date) { alert("กรุณากรอกชื่ออีเวนต์และวันที่"); return; }
+  const payload = {
+    id: editingForm?.sourceId || Date.now(),
+    name, date,
+    month: Number(document.getElementById("f-month").value),
+    day: Number(document.getElementById("f-day").value),
+    category: document.getElementById("f-cat").value,
+    tags: document.getElementById("f-tags").value.split(",").map(t=>t.trim()).filter(Boolean),
+    note: document.getElementById("f-note").value,
+  };
+
+  if (editingForm?.editKey) {
+    if (editingForm.sourceType === "base") {
+      deletedBaseIds.push(editingForm.sourceId);
+      customEvents.push(payload);
+    } else {
+      customEvents = customEvents.map(e => e.id===editingForm.sourceId ? payload : e);
+    }
+  } else {
+    customEvents.push(payload);
+  }
+  save();
+  editingForm = null;
+  setTab("list");
+}
+
+function cancelForm() {
+  editingForm = null;
+  setTab("list");
+}
+
+function askDelete(key) {
+  const ev = getAllEvents().find(e=>getKey(e)===key);
+  if (!ev) return;
+  pendingDeleteEvent = ev;
+  document.getElementById("deleteModalName").textContent = `"${ev.name}"`;
+  document.getElementById("deleteModal").style.display = "flex";
+}
+
+function doDelete() {
+  if (!pendingDeleteEvent) return;
+  const ev = pendingDeleteEvent;
+  if (ev.sourceType==="base") deletedBaseIds.push(ev.id);
+  else customEvents = customEvents.filter(e=>e.id!==ev.id);
+  save();
+  pendingDeleteEvent = null;
+  document.getElementById("deleteModal").style.display = "none";
+  render();
+}
+
+function calPrev() { calendarMonth = calendarMonth===1?12:calendarMonth-1; render(); }
+function calNext() { calendarMonth = calendarMonth===12?1:calendarMonth+1; render(); }
+
+function onDragStart(e, key) { dragKey = key; e.dataTransfer.setData("text/plain", key); }
+function onDrop(e, month, day) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  const key = e.dataTransfer.getData("text/plain") || dragKey;
+  if (!key) return;
+  const [type, id] = key.split("-");
+  if (type !== "custom") return;
+  customEvents = customEvents.map(ev => {
+    if (String(ev.id)===id) return {...ev, month, day, date:`${day} ${MONTHS_LABEL[month]}`};
+    return ev;
+  });
+  save();
+  render();
+}
+
+/* ============================================================
+   AI (calls Claude API via proxy)
+============================================================ */
+async function callClaude(prompt) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: "คุณคือผู้เชี่ยวชาญด้านการวางแผนอีเวนต์เกมและนักการตลาดมือโปร",
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text || "";
+}
+
+function setAiLoading(v) {
+  isAiLoading = v;
+  const sp = document.getElementById("aiSpinner");
+  if (sp) sp.style.display = v ? "block" : "none";
+  ["aiTagsBtn","aiIdeaBtn","aiPolishBtn"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = v;
+  });
+}
+
+async function aiIdeas() {
+  const name = document.getElementById("f-name")?.value?.trim();
+  if (!name || isAiLoading) return;
+  setAiLoading(true);
+  try {
+    const r = await callClaude(`จากชื่ออีเวนต์เกม "${name}" ช่วยคิดไอเดียกิจกรรมย่อย 3 อย่าง และของรางวัลที่น่าสนใจ พยายามให้สอดคล้องกับธีมเทศกาล`);
+    document.getElementById("f-note").value = r;
+  } catch(e) { alert("AI ไม่พร้อมใช้งาน"); }
+  setAiLoading(false);
+}
+
+async function aiPolish() {
+  const note = document.getElementById("f-note")?.value?.trim();
+  if (!note || isAiLoading) return;
+  setAiLoading(true);
+  try {
+    const r = await callClaude(`ช่วยเกลาข้อความต่อไปนี้ให้น่าอ่านและดูเป็นมืออาชีพมากขึ้นสำหรับผู้เล่นเกม: ${note}`);
+    document.getElementById("f-note").value = r;
+  } catch(e) { alert("AI ไม่พร้อมใช้งาน"); }
+  setAiLoading(false);
+}
+
+async function aiTags() {
+  const name = document.getElementById("f-name")?.value?.trim();
+  if (!name || isAiLoading) return;
+  setAiLoading(true);
+  try {
+    const r = await callClaude(`แนะนำ tags สั้นๆ 5 อันสำหรับอีเวนต์ "${name}" แบ่งด้วยจุลภาค ตอบเฉพาะ tags เท่านั้น ไม่ต้องมีคำอธิบาย`);
+    document.getElementById("f-tags").value = r.replace(/\./g,"");
+  } catch(e) { alert("AI ไม่พร้อมใช้งาน"); }
+  setAiLoading(false);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+document.getElementById("mainNav").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-tab]");
+  if (btn) { editingForm=null; setTab(btn.dataset.tab); }
+});
+document.getElementById("btnNew").addEventListener("click", () => {
+  editingForm = null; setTab("form");
+});
+document.getElementById("mobileNav").addEventListener("click", e => {
+  const btn = e.target.closest("[data-tab]");
+  if (btn) { editingForm=null; setTab(btn.dataset.tab); }
+  if (e.target.closest("#mob-new")) { editingForm=null; setTab("form"); }
+});
+document.getElementById("searchInput")?.addEventListener("input", e => {
+  searchQuery = e.target.value; render();
+});
+document.getElementById("monthSelect")?.addEventListener("change", e => {
+  monthFilter = Number(e.target.value); render();
+});
+document.getElementById("catSelect")?.addEventListener("change", e => {
+  activeCategory = e.target.value; render();
+});
+document.getElementById("confirmDelBtn").addEventListener("click", doDelete);
+document.getElementById("cancelDelBtn").addEventListener("click", () => {
+  document.getElementById("deleteModal").style.display = "none";
+  pendingDeleteEvent = null;
+});
+
+// toolbar re-attach after render (since toolbar is static)
+document.getElementById("searchInput").addEventListener("input", e => { searchQuery=e.target.value; render(); });
+document.getElementById("monthSelect").addEventListener("change", e => { monthFilter=Number(e.target.value); render(); });
+document.getElementById("catSelect").addEventListener("change", e => { activeCategory=e.target.value; render(); });
+
+render();
+</script>
+</body>
+</html>
